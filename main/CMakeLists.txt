@@ -7,4 +7,7 @@ idf_component_register(SRCS "hello_world_main.c"
                                 lvgl
                                 lvgl_esp32_drivers
                                 lvgl_porting
+                                CO2
+                                MQ2
+                                MQ7
                                 )

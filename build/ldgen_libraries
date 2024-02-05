@@ -76,4 +76,7 @@ D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/aliyunMQTT/libaliyunMQTT.a
 D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/lvgl/liblvgl.a
 D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/lvgl_esp32_drivers/liblvgl_esp32_drivers.a
 D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/lvgl_porting/liblvgl_porting.a
+D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/CO2/libCO2.a
+D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/MQ2/libMQ2.a
+D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/MQ7/libMQ7.a
 D:/WorkSpace/EmbedDev/hello_world/build/esp-idf/main/libmain.a

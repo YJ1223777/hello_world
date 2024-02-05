@@ -76,4 +76,7 @@ $<TARGET_FILE:__idf_aliyunMQTT>
 $<TARGET_FILE:__idf_lvgl>
 $<TARGET_FILE:__idf_lvgl_esp32_drivers>
 $<TARGET_FILE:__idf_lvgl_porting>
+$<TARGET_FILE:__idf_CO2>
+$<TARGET_FILE:__idf_MQ2>
+$<TARGET_FILE:__idf_MQ7>
 $<TARGET_FILE:__idf_main>

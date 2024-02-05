@@ -1,8 +1,8 @@
 /*
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2023-11-13 13:55:39
- * @LastEditors: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
- * @LastEditTime: 2024-01-05 16:59:54
+ * @LastEditors: YJ\YJ_1223 YJ2386708206@163.com
+ * @LastEditTime: 2024-02-05 22:12:46
  * @FilePath: \hello_world\components\DHT11\DHT11.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -60,7 +60,7 @@ static int parse_items(rmt_item32_t *item, int item_num, int *humidity, int *tem
 
 	// 检查校验
 	if ((((temp >> 8) + temp + (rh >> 8) + rh) & 0xFF) != checksum){
-		printf("Checksum failure %4X %4X %2X\n", temp, rh, checksum);
+		// printf("Checksum failure %4X %4X %2X\n", temp, rh, checksum);
 		return 0;
 	}
 
@@ -107,7 +107,7 @@ int Get_DHT11_Data(int *temp_x10, int *humidity)
 	if (item){
 		int n;
 		n = rx_size / 4 - 0;
-		printf("number:%d\r\n", n);
+		// printf("number:%d\r\n", n);
 		// 解析来自ringbuffer的数据值.
 		rtn = parse_items(item, n, humidity, temp_x10);
 		// 解析数据后，将空格返回到ringbuffer.
