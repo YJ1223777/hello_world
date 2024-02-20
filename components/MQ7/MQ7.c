@@ -2,7 +2,7 @@
  * @Author: YJ\YJ_1223 YJ2386708206@163.com
  * @Date: 2024-02-05 23:01:15
  * @LastEditors: YJ\YJ_1223 YJ2386708206@163.com
- * @LastEditTime: 2024-02-05 23:22:47
+ * @LastEditTime: 2024-02-20 21:13:25
  * @FilePath: \hello_world\components\MQ7\MQ7.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -60,7 +60,7 @@ float get_MQ7_Value(void)
     float coVol = voltage/1000.0f;
     float RS = (3.3f - coVol) / coVol * RL;
     float MQ7_ppm = 98.322f * pow(RS/R0, -1.458f);
-    ESP_LOGI("MQ7 Test","MQ7_ppm:%.2f",MQ7_ppm);
+    // ESP_LOGI("MQ7 Test","MQ7_ppm:%.2f",MQ7_ppm);
     return MQ7_ppm;
 }
 

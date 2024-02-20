@@ -1,8 +1,8 @@
 /*
- * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
+ * @Author: YJ\YJ_1223 YJ2386708206@163.com
  * @Date: 2023-12-05 18:31:03
  * @LastEditors: YJ\YJ_1223 YJ2386708206@163.com
- * @LastEditTime: 2024-02-05 23:23:07
+ * @LastEditTime: 2024-02-20 21:24:27
  * @FilePath: \hello_world\main\hello_world_main.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -41,10 +41,10 @@
 #define itemStackSize 1024
 const static char *TAG = "smart farm";
 int WiFiState=0;
-TaskHandle_t readDataHandle;
-TaskHandle_t pubDataHandle;
+TaskHandle_t dealDataTaskHandle;
+// TaskHandle_t pubDataHandle;
 
-static int AirTempTest, AirHumTest;
+float* DHT11Res;
 float luxTest=0.0;
 float co2Val,smogVal,coVal;
 
@@ -57,18 +57,21 @@ TimerHandle_t lvglTimer;
 // 	lv_tick_inc(10);
 // }
 
-void readDataTask(void *Param)
+void dealDataTask(void *Param)
 {
     while (1)
     {
-        // printf("readDataTask\r\n");
-        Get_DHT11_Data(&AirTempTest, &AirHumTest);
+        char payload[1024];
+        DHT11Res = readDHT11Data();
         luxTest = BH1750_ReadLightIntensity();
         co2Val = get_CO2_Value();
         smogVal = get_MQ2_Value();
         coVal = get_MQ7_Value();
-        // ESP_LOGI(TAG, "[%lld] temp->%i.%i C   hum->%i%%   Lux->%.02f   CO2->%.2f", 
-        // esp_timer_get_time(), AirTempTest / 10, AirTempTest % 10, AirHumTest, luxTest, co2Vol);
+        // ESP_LOGI(TAG, "temp->%.01fC   hum->%d  Lux->%.02f", DHT11Res[0], (int)DHT11Res[1], luxTest);
+        sprintf(payload,
+        "{\"id\":1701069511681,\"params\":{\"airTemp\":%.1f,\"airHumi\":%d,\"lightLux\":%.2f,\"co\":%.2f,\"co2\":%.2f,\"smog\":%.2f,\"soilHumidity\":9.99,\"waterLevel\":9.99},\"version\":\"1.0\",\"method\":\"thing.event.property.post\"}"
+        ,DHT11Res[0],(int)DHT11Res[1],luxTest,coVal,smogVal,co2Val);
+        esp_mqtt_client_publish(client, AliyunPublishTopic,payload, strlen(payload), 1, 0);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }   
 }
@@ -86,7 +89,8 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    DHT11_Init(DHT11_GPIO);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
     I2C_Init();
     BH1750_Init();
     CO2_ADC1_CHANNEL_6_init();
@@ -108,11 +112,11 @@ void app_main(void)
 
     // lv_demo_music();
 
-    // wifi_init_sta();
-    // user_mqtt_app_start();
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    wifi_init_sta();
+    user_mqtt_app_start();
+    vTaskDelay(pdMS_TO_TICKS(2000));
 
-    xTaskCreate(readDataTask, "readData", itemStackSize * 8, NULL, 1, &readDataHandle);
+    xTaskCreate(dealDataTask, "readData", itemStackSize * 4, NULL, 5, &dealDataTaskHandle);
 
     while (1)
     {
@@ -121,8 +125,8 @@ void app_main(void)
         // luxTest = BH1750_ReadLightIntensity();
         // ESP_LOGI(TAG, "[%lld] temp->%i.%i C     hum->%i%%     Lux->%.02f", esp_timer_get_time(), AirTempTest / 10, AirTempTest % 10, AirHumTest, luxTest);
         // lv_task_handler();
-        
-        vTaskDelay(pdMS_TO_TICKS(100));
+        // printf("temp:%.2f,humi:%.2f\r\n",DHT11Res[0],DHT11Res[1]);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 
 }

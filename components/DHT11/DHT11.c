@@ -2,7 +2,7 @@
  * @Author: error: error: git config user.name & please set dead value or install git && error: git config user.email & please set dead value or install git & please set dead value or install git
  * @Date: 2023-11-13 13:55:39
  * @LastEditors: YJ\YJ_1223 YJ2386708206@163.com
- * @LastEditTime: 2024-02-05 22:12:46
+ * @LastEditTime: 2024-02-19 11:22:14
  * @FilePath: \hello_world\components\DHT11\DHT11.c
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -11,113 +11,243 @@
 
 #define TAG "dht11"
 
-int temp_x10 = 123;
-int humidity = 60;
-const int channel = 1;
+//温湿度定义
+uchar ucharFLAG,uchartemp;
+float Humi,Temp;
+uchar ucharT_data_H,ucharT_data_L,ucharRH_data_H,ucharRH_data_L,ucharcheckdata;
+uchar ucharT_data_H_temp,ucharT_data_L_temp,ucharRH_data_H_temp,ucharRH_data_L_temp,ucharcheckdata_temp;
+uchar ucharcomdata;
 
-uint8_t DHT11_PIN = -1;
-/*RMT分频后可以获得一个方波信号，这里将这个方波信号的周期称为tick，
-之后由RMT生成的信号都是基于tick的
-比如说tick为1us，那么生成信号低电平或高电平时间必然是n*tick，n=0，1，2，...*/
-void DHT11_Init(uint8_t dht11_pin)
+// int temp_x10 = 123;
+// int humidity = 60;
+// const int channel = 1;
+
+// uint8_t DHT11_PIN = -1;
+// /*RMT分频后可以获得一个方波信号，这里将这个方波信号的周期称为tick，
+// 之后由RMT生成的信号都是基于tick的
+// 比如说tick为1us，那么生成信号低电平或高电平时间必然是n*tick，n=0，1，2，...*/
+// void DHT11_Init(uint8_t dht11_pin)
+// {
+//     DHT11_PIN = dht11_pin;
+// 	const int RMT_CLK_DIV = 80;                                   // RMT计数器时钟分频器
+// 	const int RMT_TICK_10_US = (80000000 / RMT_CLK_DIV / 100000); // RMT计数器10us.(时钟源是APB时钟)
+// 	const int rmt_item32_tIMEOUT_US = 1000;                       // RMT接收超时us
+// 	rmt_config_t rmt_rx;
+// 	rmt_rx.gpio_num = dht11_pin;
+// 	rmt_rx.channel = channel;
+// 	rmt_rx.clk_div = RMT_CLK_DIV;
+// 	rmt_rx.mem_block_num = 1;
+// 	rmt_rx.rmt_mode = RMT_MODE_RX;
+// 	rmt_rx.rx_config.filter_en = false;
+// 	rmt_rx.rx_config.filter_ticks_thresh = 100;
+// 	rmt_rx.rx_config.idle_threshold = rmt_item32_tIMEOUT_US / 10 * (RMT_TICK_10_US);
+// 	// rmt_config(&rmt_rx);
+// 	// rmt_driver_install(rmt_rx.channel, 1000, 0);
+
+// 	ESP_ERROR_CHECK(rmt_config(&rmt_rx));
+// 	//给RMT RX的环形缓冲区分配1000字节大小
+// 	ESP_ERROR_CHECK(rmt_driver_install(rmt_rx.channel, 1024, 0));
+// }
+
+
+// // 将RMT读取到的脉冲数据处理为温度和湿度
+// static int parse_items(rmt_item32_t *item, int item_num, int *humidity, int *temp_x10)
+// {
+// 	int i = 0;
+// 	unsigned rh = 0, temp = 0, checksum = 0;
+// 	if (item_num < 42){					// 检查是否有足够的脉冲数
+// 		return 0;
+// 	}
+// 	item++;								// 跳过开始信号脉冲
+// 	for (i = 0; i < 16; i++, item++){	// 提取湿度数据
+// 		rh = (rh << 1) + (item->duration1 < 35 ? 0 : 1);
+// 	}
+// 	for (i = 0; i < 16; i++, item++){	// 提取温度数据
+// 		temp = (temp << 1) + (item->duration1 < 35 ? 0 : 1);
+// 	}
+// 	for (i = 0; i < 8; i++, item++){	// 提取校验数据
+// 		checksum = (checksum << 1) + (item->duration1 < 35 ? 0 : 1);
+// 	}
+
+// 	// 检查校验
+// 	if ((((temp >> 8) + temp + (rh >> 8) + rh) & 0xFF) != checksum){
+// 		printf("Checksum failure %4X %4X %2X\n", temp, rh, checksum);
+// 		return 0;
+// 	}
+
+// 	// 返回数据
+// 	// *humidity = rh >> 8;
+// 	// printf("rh:%d\r\n",rh);
+// 	// printf("temp:%d\r\n",temp);
+// 	*humidity = (rh >> 8);
+// 	*temp_x10 = (temp >> 8) * 10 + (temp & 0xFF);
+// 	return 1;
+
+// }
+
+// // 使用RMT接收DHT11数据
+// int Get_DHT11_Data(int *temp_x10, int *humidity)
+// {
+// 	RingbufHandle_t rb = NULL;
+// 	size_t rx_size = 0;
+// 	rmt_item32_t *item;
+// 	int rtn = 0;
+// 	//获得RMT RX环形缓冲区句柄，并处理RX数据
+// 	rmt_get_ringbuf_handle(channel, &rb);
+// 	if (!rb){
+// 		return 0;
+// 	}
+// 	//发送20ms脉冲启动DHT11单总线
+// 	gpio_set_level(DHT11_PIN, 1);
+// 	gpio_set_direction(DHT11_PIN, GPIO_MODE_OUTPUT);
+// 	esp_rom_delay_us(1000);
+// 	gpio_set_level(DHT11_PIN, 0);
+// 	esp_rom_delay_us(24000);
+ 
+// 	//将rmt_rx_start和rmt_rx_stop放入缓存
+// 	rmt_rx_start(channel, 1);
+// 	rmt_rx_stop(channel);
+
+// 	//信号线设置为输入准备接收数据
+// 	gpio_set_level(DHT11_PIN, 1);
+// 	gpio_set_direction(DHT11_PIN, GPIO_MODE_INPUT);
+// 	// ets_delay_us(50);									// 传感器转换需要时间
+ 
+// 	//这次启动RMT接收器以获取数据
+// 	rmt_rx_start(channel, 1);
+ 
+// 	//从环形缓冲区中取出数据
+// 	item = (rmt_item32_t *)xRingbufferReceive(rb, &rx_size, 2);
+// 	if (item){
+// 		int n;
+// 		n = rx_size / 4 - 0;
+// 		// printf("number:%d\r\n", n);
+// 		// 解析来自ringbuffer的数据值.
+// 		rtn = parse_items(item, n, humidity, temp_x10);
+// 		// 解析数据后，将空格返回到ringbuffer.
+// 		vRingbufferReturnItem(rb, (void *)item);
+// 	}
+// 	//停止RMT接收
+// 	rmt_rx_stop(channel);
+// 	return rtn;
+// }
+
+
+static void InputInitial(void)//设置端口为输入
 {
-    DHT11_PIN = dht11_pin;
-	const int RMT_CLK_DIV = 80;                                   // RMT计数器时钟分频器
-	const int RMT_TICK_10_US = (80000000 / RMT_CLK_DIV / 100000); // RMT计数器10us.(时钟源是APB时钟)
-	const int rmt_item32_tIMEOUT_US = 1000;                       // RMT接收超时us
-	rmt_config_t rmt_rx;
-	rmt_rx.gpio_num = dht11_pin;
-	rmt_rx.channel = channel;
-	rmt_rx.clk_div = RMT_CLK_DIV;
-	rmt_rx.mem_block_num = 1;
-	rmt_rx.rmt_mode = RMT_MODE_RX;
-	rmt_rx.rx_config.filter_en = false;
-	rmt_rx.rx_config.filter_ticks_thresh = 100;
-	rmt_rx.rx_config.idle_threshold = rmt_item32_tIMEOUT_US / 10 * (RMT_TICK_10_US);
-	rmt_config(&rmt_rx);
-	rmt_driver_install(rmt_rx.channel, 1000, 0);
+  gpio_pad_select_gpio(DHT11_GPIO);
+  gpio_set_direction(DHT11_GPIO, GPIO_MODE_INPUT);
+}
+ 
+static void OutputHigh(void)//输出1
+{
+  gpio_pad_select_gpio(DHT11_GPIO);
+  gpio_set_direction(DHT11_GPIO, GPIO_MODE_OUTPUT);
+  gpio_set_level(DHT11_GPIO, 1);
+}
+ 
+static void OutputLow(void)//输出0
+{
+  gpio_pad_select_gpio(DHT11_GPIO);
+  gpio_set_direction(DHT11_GPIO, GPIO_MODE_OUTPUT);
+  gpio_set_level(DHT11_GPIO, 0);
+}
+ 
+static uint8 getData(void)//读取状态
+{
+	return gpio_get_level(DHT11_GPIO);
 }
 
-
-// 将RMT读取到的脉冲数据处理为温度和湿度
-static int parse_items(rmt_item32_t *item, int item_num, int *humidity, int *temp_x10)
+//读取一个字节数据
+static void COM(void)    // 温湿写入
 {
-	int i = 0;
-	unsigned rh = 0, temp = 0, checksum = 0;
-	if (item_num < 41){					// 检查是否有足够的脉冲数
-		return 0;
-	}
-	item++;								// 跳过开始信号脉冲
-	for (i = 0; i < 16; i++, item++){	// 提取湿度数据
-		rh = (rh << 1) + (item->duration1 < 35 ? 0 : 1);
-	}
-	for (i = 0; i < 16; i++, item++){	// 提取温度数据
-		temp = (temp << 1) + (item->duration1 < 35 ? 0 : 1);
-	}
-	for (i = 0; i < 8; i++, item++){	// 提取校验数据
-		checksum = (checksum << 1) + (item->duration1 < 35 ? 0 : 1);
-	}
-
-	// 检查校验
-	if ((((temp >> 8) + temp + (rh >> 8) + rh) & 0xFF) != checksum){
-		// printf("Checksum failure %4X %4X %2X\n", temp, rh, checksum);
-		return 0;
-	}
-
-	// 返回数据
-	// *humidity = rh >> 8;
-	*humidity = (rh >> 8);
-	*temp_x10 = (temp >> 8) * 10 + (temp & 0xFF);
-	return 1;
-
+    uchar i;
+    for(i=0;i<8;i++)
+    {
+        ucharFLAG=2;
+        //等待IO口变低，变低后，通过延时去判断是0还是1
+        while((getData()==0)&&ucharFLAG++) ets_delay_us(10);
+        ets_delay_us(35);//延时35us
+        uchartemp=0;
+ 
+        //如果这个位是1，35us后，还是1，否则为0
+        if(getData()==1)
+          uchartemp=1;
+        ucharFLAG=2;
+ 
+        //等待IO口变高，变高后，表示可以读取下一位
+        while((getData()==1)&&ucharFLAG++)
+          ets_delay_us(10);
+        if(ucharFLAG==1)
+          break;
+        ucharcomdata<<=1;
+        ucharcomdata|=uchartemp;
+    }
 }
 
-// 使用RMT接收DHT11数据
-int Get_DHT11_Data(int *temp_x10, int *humidity)
+float* readDHT11Data(void)   //温湿传感启动
 {
-	RingbufHandle_t rb = NULL;
-	size_t rx_size = 0;
-	rmt_item32_t *item;
-	int rtn = 0;
-	//获得RMT RX环形缓冲区句柄，并处理RX数据
-	rmt_get_ringbuf_handle(channel, &rb);
-	if (!rb){
-		return 0;
-	}
-	//发送20ms脉冲启动DHT11单总线
-	gpio_set_level(DHT11_PIN, 1);
-	gpio_set_direction(DHT11_PIN, GPIO_MODE_OUTPUT);
-	esp_rom_delay_us(1000);
-	gpio_set_level(DHT11_PIN, 0);
-	esp_rom_delay_us(20000);
+    OutputLow();
+    esp_rom_delay_us(20000);  //>18MS
+    OutputHigh();
+    InputInitial(); //输入
+    ets_delay_us(30);
+    if(!getData())//表示传感器拉低总线
+    {
+        ucharFLAG=2;
+        //等待总线被传感器拉高
+        while((!getData())&&ucharFLAG++)
+          ets_delay_us(10);
+        //等待总线被传感器拉低
+        while((getData())&&ucharFLAG++)
+          ets_delay_us(10);
+        COM();//读取第1字节，
+        ucharRH_data_H_temp=ucharcomdata;
+		// printf("humiH:%d\r\n",ucharRH_data_H_temp);
+        COM();//读取第2字节，
+        ucharRH_data_L_temp=ucharcomdata;
+		// printf("humiL:%d\r\n",ucharRH_data_L_temp);
+        COM();//读取第3字节，
+        ucharT_data_H_temp=ucharcomdata;
+		// printf("tempH:%d\r\n",ucharT_data_H_temp);
+        COM();//读取第4字节，
+        ucharT_data_L_temp=ucharcomdata;
+		// printf("tempL:%d\r\n",ucharT_data_L_temp);
+        COM();//读取第5字节，
+        ucharcheckdata_temp=ucharcomdata;
+        OutputHigh();
+        //判断校验和是否一致
+        uchartemp=(ucharT_data_H_temp+ucharT_data_L_temp+ucharRH_data_H_temp+ucharRH_data_L_temp);
+        if(uchartemp==ucharcheckdata_temp)
+        {
+            //校验和一致，
+            ucharRH_data_H=ucharRH_data_H_temp;
+            ucharRH_data_L=ucharRH_data_L_temp;
+            ucharT_data_H=ucharT_data_H_temp;
+            ucharT_data_L=ucharT_data_L_temp;
+            ucharcheckdata=ucharcheckdata_temp;
+            //保存温度和湿度
+            Humi=ucharRH_data_H;
+            // Humi=((uint16)Humi<<8|ucharRH_data_L)/10;
  
-	//将rmt_rx_start和rmt_rx_stop放入缓存
-	rmt_rx_start(channel, 1);
-	rmt_rx_stop(channel);
- 
-	//信号线设置为输入准备接收数据
-	gpio_set_level(DHT11_PIN, 1);
-	gpio_set_direction(DHT11_PIN, GPIO_MODE_INPUT);
- 
-	//这次启动RMT接收器以获取数据
-	rmt_rx_start(channel, 1);
- 
-	//从环形缓冲区中取出数据
-	item = (rmt_item32_t *)xRingbufferReceive(rb, &rx_size, 2);
-	if (item){
-		int n;
-		n = rx_size / 4 - 0;
-		// printf("number:%d\r\n", n);
-		// 解析来自ringbuffer的数据值.
-		rtn = parse_items(item, n, humidity, temp_x10);
-		// 解析数据后，将空格返回到ringbuffer.
-		vRingbufferReturnItem(rb, (void *)item);
-	}
-	//停止RMT接收
-	rmt_rx_stop(channel);
-	return rtn;
-	
+            Temp=ucharT_data_H + (float)ucharT_data_L/10;
+            // Temp=((uint16)Temp<<8|ucharT_data_L)/10;
+        }
+        else
+        {
+          Humi=100;
+          Temp=100;
+        }
+    }
+    else //没用成功读取，返回0
+    {
+    	Humi=0,
+    	Temp=0;
+    }
+	static float res[2];
+	res[0] = Temp;
+	res[1] = Humi;
+	// printf("Temp=%.2f------Humi=%.2f \r\n", Temp,Humi);
+    OutputHigh(); //输出
+	return res;
 }
-
-
-

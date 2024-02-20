@@ -10,9 +10,10 @@
     "esp_event.h": "c",
     "esp_log.h": "c",
     "co2.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "rmt_reg.h": "c"
   },
   "idf.flashType": "UART",
-  "idf.portWin": "COM7",
+  "idf.portWin": "COM8",
   "idf.adapterTargetName": "esp32"
 }

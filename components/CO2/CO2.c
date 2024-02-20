@@ -42,7 +42,7 @@ float get_CO2_Value(void)
     uint32_t voltage = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars)-offsetVoltage;
     float CO2_ppm = 100.0-(((float)voltage-330.0)/0.06778);
     // printf("Raw: %d\tVoltage: %dmV\n", adc_reading, voltage);
-    printf("CO2_ppm: %.2f\r\n", CO2_ppm);
+    // printf("CO2_ppm: %.2f\r\n", CO2_ppm);
     // vTaskDelay(pdMS_TO_TICKS(1000));
     return CO2_ppm;
 }

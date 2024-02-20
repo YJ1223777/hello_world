@@ -43,6 +43,6 @@ float get_MQ2_Value(void)
     float smogVol = voltage/1000.0f;
     float RS = (3.3f - smogVol) / smogVol * RL;
 	float MQ2_ppm = 98.322f * pow(RS/R0, -1.458f);
-    ESP_LOGI("MQ2 Test","MQ2_ppm:%.2f",MQ2_ppm);
+    // ESP_LOGI("MQ2 Test","MQ2_ppm:%.2f",MQ2_ppm);
     return MQ2_ppm;
 }

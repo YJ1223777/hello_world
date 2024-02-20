@@ -50,3 +50,7 @@ Please use the following feedback channels:
 * For a feature request or bug report, create a [GitHub issue](https://github.com/espressif/esp-idf/issues)
 
 We will get back to you as soon as possible.
+
+### AIOT_test_pub_data
+
+publish topic=/sys/idsyUiYx0qO/ESP32_farm/thing/event/property/post, payload={"id":1701069511681,"params":{"airTemp":27,"airHumi":44,"LightLux":876.67},"version":"1.0","method":"thing.event.property.post"}
